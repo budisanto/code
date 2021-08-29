@@ -35,7 +35,7 @@ new_image = cv2.bitwise_and(image,image,mask=mask)
 (topx, topy) = (np.min(x), np.min(y))
 (bottomx, bottomy) = (np.max(x), np.max(y))
 Cropped = gray[topx:bottomx+1, topy:bottomy+1]
-Cropped = cv2.resize(Cropped,(0,0),fx=3,fy=3)
+
 text = pytesseract.image_to_string(Cropped, config='--psm 11')
 print("Detected Number is:",text)
 
