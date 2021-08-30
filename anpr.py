@@ -3,8 +3,19 @@ import imutils
 import numpy as np
 import pytesseract
 from PIL import Image
+import argparse
+import urllib
 
-image = cv2.imread('4.jpg')
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--image", type=str, required=True,
+	help="path to the input image")
+args = vars(ap.parse_args())
+#image = cv2.imread(args["image"])
+req = urllib.urlopen(args["image"])
+arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
+image = cv2.imdecode(arr, -1) # 'Load it as it is'
+
+#image = cv2.imread('4.jpg')
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #convert to grey scale
 gray = cv2.bilateralFilter(gray, 11, 17, 17) #Blur to reduce noise
