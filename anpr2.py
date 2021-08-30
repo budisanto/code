@@ -3,8 +3,8 @@ import imutils
 import numpy as np
 import pytesseract
 import argparse
-from PIL import Image
 import  urllib
+from PIL import Image, ImageEnhance, ImageFilter
 
 #=====================================================
 ap = argparse.ArgumentParser()
@@ -17,18 +17,34 @@ image = cv2.imread(args["image"])
 #image = cv2.imread('6.jpg')
 
 #=====================================================
-cv2.imshow('raw',image)
+cv2.imshow('input',image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 #=====================================================
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #convert to grey scale
+
+#blur = cv2.GaussianBlur(gray, (3,3), 0)
+#thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+
+#=====================================================
+#cv2.imshow('gray-blur',blur)
+#cv2.imshow('threshold',thresh)
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
+#=====================================================
+
 gray = cv2.bilateralFilter(gray, 11, 17, 17) #Blur to reduce noise
 edged = cv2.Canny(gray, 30, 200) #Perform Edge detection
-cnts = cv2.findContours(edged.copy(), cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+cnts = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
 cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:10]
-
+#=====================================================
+cv2.imshow('gray-blur',gray)
+cv2.imshow('edge',edged)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+#=====================================================
 screenCnt = None
 for c in cnts:
     peri = cv2.arcLength(c, True)
@@ -54,25 +70,24 @@ Cropped = gray[topx:bottomx+1, topy:bottomy+1]
 Cropped = cv2.resize(Cropped,(1000,400))
 
 #=====================================================
-cv2.imshow('crop',Cropped)
+cv2.imshow('gray-blur',gray)
+cv2.imshow('edge',edged)
+cv2.imshow('Cropped-resize',Cropped)
+cv2.imshow('Contour-bitwise',new_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 #=====================================================
 
-#========= untuk background putih/hitam beda =================
-retval, image = cv2.threshold(image,150,255, cv2.THRESH_BINARY)
-#=============================================================
-image = cv2.GaussianBlur(image,(11,11),0)
-image = cv2.medianBlur(image,9)
+#im = Image.open("temp.jpg") # the second one 
+#im = Cropped
+##im = im.filter(ImageFilter.MedianFilter())
+#enhancer = ImageEnhance.Contrast(im)
+#im = enhancer.enhance(2)
+#im = im.convert('1')
 
-#=====================================================
-cv2.imshow('crop',Cropped)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-#=====================================================
-
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 text = pytesseract.image_to_string(Cropped, config='--psm 3')
 print("Detected Number is:",text)
 
-
+#im.save('temp2.jpg')
+#text = pytesseract.image_to_string(Image.open('temp2.jpg'))
+#print(text)
